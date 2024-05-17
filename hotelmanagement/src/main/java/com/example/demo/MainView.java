@@ -2,6 +2,8 @@ package com.example.demo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -16,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Route("")
 public class MainView extends VerticalLayout{
@@ -24,6 +27,7 @@ public class MainView extends VerticalLayout{
     private TextField name = new TextField("Hotel name");
     private TextField rooms = new TextField("Number of rooms");
     private TextField distance = new TextField("Distance");
+    private Button search = new Button("Search");
     private Grid<Hotel> grid = new Grid<>(Hotel.class);
     private Binder<Hotel> binder = new Binder<>(Hotel.class);
 
@@ -39,12 +43,27 @@ public class MainView extends VerticalLayout{
             e.printStackTrace();
         }
         grid.setColumns("name", "roomsCount", "distance");
+        add(new H1("Hotel Management App"));
+        HorizontalLayout layout = new HorizontalLayout(distance, search);
+        layout.setAlignItems(Alignment.BASELINE);
+        add(layout);
         add(grid);
         refreshGrid();
+
+        search.addClickListener(event -> refreshGrid());
     }
 
     private void refreshGrid() {
-        grid.setItems(hotelRepository.findAll());
+        List<Hotel> allHotels = hotelRepository.findAll();
+        if (distance.getValue() == null || distance.getValue().isEmpty()) {
+            grid.setItems(allHotels);
+        } else {
+            double filterDistance = Double.parseDouble(distance.getValue());
+            List<Hotel> filteredHotels = allHotels.stream()
+                    .filter(hotel -> hotel.getDistance() <= filterDistance)
+                    .collect(Collectors.toList());
+            grid.setItems(filteredHotels);
+        }
     }
 
     private List<Hotel> readHotelsFromJson() throws IOException {
