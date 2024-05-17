@@ -13,7 +13,9 @@ public class Hotel {
     private double longitude;
 
     private double distance;
-    @OneToMany
+
+    private int roomsCount;
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Room> rooms;
 
 
@@ -23,6 +25,10 @@ public class Hotel {
         this.latitude = latitude;
         this.longitude = longitude;
         this.rooms = rooms;
+    }
+
+    public Hotel() {
+
     }
 
     // Method to find a room by room number
@@ -68,5 +74,17 @@ public class Hotel {
 
     public void setDistanceToUser(double distance) {
         this.distance = distance;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public int getRoomsCount() {
+        return roomsCount;
+    }
+
+    public void setRoomsCount(int roomsCount){
+        this.roomsCount = roomsCount;
     }
 }

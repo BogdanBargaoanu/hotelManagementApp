@@ -24,6 +24,10 @@ public class Room {
         this.isAvailable = isAvailable;
     }
 
+    public Room() {
+
+    }
+
     // Method to mark a room as unavailable
     public void setUnavailable() {
         this.isAvailable = false;
@@ -46,7 +50,7 @@ public class Room {
         return price;
     }
 
-    public boolean isAvailable() {
+    public boolean getIsAvailable() {
         return isAvailable;
     }
 }
