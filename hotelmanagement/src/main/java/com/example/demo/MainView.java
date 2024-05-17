@@ -4,14 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.function.SerializableBiConsumer;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.router.Route;
+import org.hibernate.sql.exec.ExecutionException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Route("")
+@JsModule("./location.js")
 public class MainView extends VerticalLayout{
     private HotelRepository hotelRepository;
 
@@ -30,12 +37,15 @@ public class MainView extends VerticalLayout{
     private Button search = new Button("Search");
     private Grid<Hotel> grid = new Grid<>(Hotel.class);
     private Binder<Hotel> binder = new Binder<>(Hotel.class);
+    private double userLatitude = 0;
+    private double userLongitude = 0;
 
     public MainView(HotelRepository hotelRepository) {
+        //getLocation();
         this.hotelRepository = hotelRepository;
         try {
             List<Hotel> hotels = readHotelsFromJson();
-            calculateDistances(37.7749, -122.4194, hotels);
+            calculateDistances(userLatitude, userLongitude, hotels);
             setRoomsCount(hotels);
             this.hotelRepository.saveAll(hotels);
         }
@@ -94,5 +104,21 @@ public class MainView extends VerticalLayout{
         for (Hotel hotel : hotels) {
             hotel.setRoomsCount(hotel.getRooms().size());
         }
+    }
+    private void getLocation() {
+        Page page = getUI().get().getPage();
+        SerializableBiConsumer<Double, Double> successCallback = this::handleLocationSuccess;
+        SerializableConsumer<String> errorCallback = this::handleLocationError;
+        page.executeJs("window.getLocation($0, $1)", successCallback, errorCallback);
+    }
+
+    private void handleLocationSuccess(Double latitude, Double longitude) {
+        userLatitude = latitude;
+        userLongitude = longitude;
+        System.out.println("Latitude: " + latitude + ", Longitude: " + longitude);
+    }
+
+    private void handleLocationError(String errorMessage) {
+        System.out.println("Error: " + errorMessage);
     }
 }

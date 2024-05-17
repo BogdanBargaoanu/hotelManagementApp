@@ -19,8 +19,6 @@ public class HotelRoomView extends VerticalLayout implements HasUrlParameter<Str
         this.hotelRepository = hotelRepository;
         try {
             List<Hotel> hotels = readHotelsFromJson();
-            calculateDistances(37.7749, -122.4194, hotels);
-            setRoomsCount(hotels);
             this.hotelRepository.saveAll(hotels);
         }
         catch (IOException e) {
