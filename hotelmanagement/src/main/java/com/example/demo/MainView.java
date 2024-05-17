@@ -43,6 +43,13 @@ public class MainView extends VerticalLayout{
             e.printStackTrace();
         }
         grid.setColumns("name", "roomsCount", "distance");
+        grid.addComponentColumn(hotel -> {
+            Button infoButton = new Button("Info");
+            infoButton.addClickListener(event -> {
+                infoButton.getUI().ifPresent(ui -> ui.navigate("hotel/" + hotel.getId()));
+            });
+            return infoButton;
+        }).setHeader("Info");
         add(new H1("Hotel Management App"));
         HorizontalLayout layout = new HorizontalLayout(distance, search);
         layout.setAlignItems(Alignment.BASELINE);
@@ -66,7 +73,7 @@ public class MainView extends VerticalLayout{
         }
     }
 
-    private List<Hotel> readHotelsFromJson() throws IOException {
+    public static List<Hotel> readHotelsFromJson() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         InputStream inputStream = new FileInputStream(new File("E:\\hotelManagementApp\\hotelmanagement\\src\\main\\resources\\static\\hotels.json"));
         return mapper.readValue(inputStream, mapper.getTypeFactory().constructCollectionType(List.class, Hotel.class));
@@ -77,13 +84,13 @@ public class MainView extends VerticalLayout{
         layout.add(name, rooms, distance);
         return layout;
     }
-    public void calculateDistances(double userLat, double userLon, List<Hotel> hotels) {
+    public static void calculateDistances(double userLat, double userLon, List<Hotel> hotels) {
         for (Hotel hotel : hotels) {
             double distance = Hotel.calculateDistance(userLat, userLon, hotel.getLatitude(), hotel.getLongitude());
             hotel.setDistanceToUser(distance);
         }
     }
-    public void setRoomsCount(List<Hotel> hotels) {
+    public static void setRoomsCount(List<Hotel> hotels) {
         for (Hotel hotel : hotels) {
             hotel.setRoomsCount(hotel.getRooms().size());
         }
