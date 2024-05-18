@@ -1,23 +1,27 @@
 package com.example.demo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.router.Route;
 import org.hibernate.sql.exec.ExecutionException;
+import com.vaadin.flow.component.UI;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,7 +45,7 @@ public class MainView extends VerticalLayout{
     private double userLongitude = 0;
 
     public MainView(HotelRepository hotelRepository) {
-        //getLocation();
+        //getCurrentLocation();
         this.hotelRepository = hotelRepository;
         try {
             List<Hotel> hotels = readHotelsFromJson();
@@ -105,20 +109,20 @@ public class MainView extends VerticalLayout{
             hotel.setRoomsCount(hotel.getRooms().size());
         }
     }
-    private void getLocation() {
-        Page page = getUI().get().getPage();
-        SerializableBiConsumer<Double, Double> successCallback = this::handleLocationSuccess;
-        SerializableConsumer<String> errorCallback = this::handleLocationError;
-        page.executeJs("window.getLocation($0, $1)", successCallback, errorCallback);
+    private void getCurrentLocation() {
+        // Call the JavaScript function
+        getElement().executeJs("window.getLocation($0, $1)",
+                this.getElement().callJsFunction("onSuccess", this),
+                this.getElement().callJsFunction("onError", this));
     }
 
-    private void handleLocationSuccess(Double latitude, Double longitude) {
-        userLatitude = latitude;
-        userLongitude = longitude;
-        System.out.println("Latitude: " + latitude + ", Longitude: " + longitude);
+    @ClientCallable
+    public void onSuccess(double latitude, double longitude) {
+        Notification.show("Current location: Latitude " + latitude + ", Longitude " + longitude);
     }
 
-    private void handleLocationError(String errorMessage) {
-        System.out.println("Error: " + errorMessage);
+    @ClientCallable
+    public void onError(String errorMessage) {
+        Notification.show("Error getting location: " + errorMessage);
     }
 }

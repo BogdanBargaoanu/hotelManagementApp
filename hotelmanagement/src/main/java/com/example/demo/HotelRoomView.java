@@ -1,7 +1,10 @@
 package com.example.demo;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +40,15 @@ public class HotelRoomView extends VerticalLayout implements HasUrlParameter<Str
             if (hotel != null) {
                 add(new H1("Hotel: " + hotel.getName()));
                 for (Room room : hotel.getRooms()) {
-                    add(new Paragraph("Room: " + room.getRoomNumber()));
+                    add(new H3("Room: " + room.getRoomNumber()));
+                    add(new Paragraph("Type: " + room.getType()));
+                    add(new Paragraph("Price: " + room.getPrice()));
+                    Paragraph availableParagraph = new Paragraph("Available: " + room.getIsAvailable());
+                    Button roomButton = new Button("Book room");
+                    roomButton.setEnabled(room.getIsAvailable());
+
+                    HorizontalLayout roomLayout = new HorizontalLayout(availableParagraph, roomButton);
+                    add(roomLayout);
                 }
             } else {
                 add(new H1("Hotel not found"));
