@@ -32,7 +32,7 @@ public class HotelRoomView extends VerticalLayout implements HasUrlParameter<Str
     @Transactional
     public void setParameter(BeforeEvent event, @OptionalParameter String hotelId) {
         Location location = event.getLocation();
-        String hotelIdParameter = location.getSegments().get(1); // Assuming hotelId is the second segment in the URL
+        String hotelIdParameter = location.getSegments().get(1); // hotelId is the second segment in the URL
 
         try {
             int id = Integer.parseInt(hotelIdParameter);
@@ -49,6 +49,14 @@ public class HotelRoomView extends VerticalLayout implements HasUrlParameter<Str
 
                     HorizontalLayout roomLayout = new HorizontalLayout(availableParagraph, roomButton);
                     add(roomLayout);
+
+                    roomButton.addClickListener(e -> {
+                        room.setUnavailable();
+                        hotelRepository.save(hotel);
+                        roomButton.setEnabled(false);
+                        availableParagraph.setText("Available: " + room.getIsAvailable());
+                        roomButton.getUI().ifPresent(ui -> ui.navigate("hotel/" + hotel.getId() + "/room/" + room.getRoomNumber()));
+                    });
                 }
             } else {
                 add(new H1("Hotel not found"));
